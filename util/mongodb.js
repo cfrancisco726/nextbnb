@@ -1,4 +1,4 @@
-import { MongoClietn } from "mongodb";
+import { MongoClient } from "mongodb";
 // mongodb nodejs driver
 
 const { MONGODB_URI, MONGODB_DB } = process.env;
@@ -19,13 +19,28 @@ if (MONGODB_DB) {
 
 let cached = global.mongo;
 
-if (cached.conn) {
-  return cached.com;
+if (!cached) {
+  cached = global.mongo = { conn: null, promise: null };
 }
 
-if (!cached.promise) {
-  const opts = {
-    useNewUriParser: true,
-    useUNifiedTopology: true,
-  };
+export async function connectToDatabase() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    const opts = {
+      useNewUriParser: true,
+      useUNifiedTopology: true,
+    };
+
+    cached.promise = MongoCLient.connect(MONGODB_URI, opts).then((client) => {
+      return {
+        client,
+        db: client.db(MONGODB_DB),
+      };
+    });
+  }
+
+  cached.conn = await cached.promise;
+  return cached.com;
 }
