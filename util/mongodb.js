@@ -3,13 +3,13 @@ import { MongoClient } from "mongodb";
 
 const { MONGODB_URI, MONGODB_DB } = process.env;
 
-if (MONGODB_URI) {
+if (!MONGODB_URI) {
   throw new Error(
     "Please define the MONGODB_URI environment variable inside .env.local"
   );
 }
 
-if (MONGODB_DB) {
+if (!MONGODB_DB) {
   throw new Error(
     "Please define the MONGODB_URI environment variable inside .env.local"
   );
@@ -29,11 +29,11 @@ export async function connectToDatabase() {
   }
   if (!cached.promise) {
     const opts = {
-      useNewUriParser: true,
-      useUNifiedTopology: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     };
 
-    cached.promise = MongoCLient.connect(MONGODB_URI, opts).then((client) => {
+    cached.promise = MongoClient.connect(MONGODB_URI, opts).then((client) => {
       return {
         client,
         db: client.db(MONGODB_DB),
@@ -42,5 +42,5 @@ export async function connectToDatabase() {
   }
 
   cached.conn = await cached.promise;
-  return cached.com;
+  return cached.conn;
 }
